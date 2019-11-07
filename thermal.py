@@ -24,7 +24,7 @@ if useConfig:
     solarPanelAbsorbed = 0.6
     otherArea = 500 / 10000
     otherAbsorbed = 0.01
-    totalHeatRadiated = 120
+    totalHeatRadiated = 250
 else:
     satMass = int(input("Mass of Satellite in grams: "))
     specificHeat = float(input("Average Specific heat of satellite: "))
@@ -47,26 +47,29 @@ xPoints = []
 yPoints = []
 for i in range(sunlightTime):
    totalJules = (sunWPA_max + albedoWPA_max) * solarPanelArea * solarPanelAbsorbed * i
-   print(solarPanelArea)
+   #print(solarPanelArea)
    totalJules += (sunWPA_max + albedoWPA_max) * otherArea * otherAbsorbed * i
    totalJules += earthIRWPA_max * (solarPanelArea + otherArea) * i
    totalJules += freeMolecular_o400 * (solarPanelArea + otherArea) * i
    totalJules -= totalHeatRadiated * i
    deltaT = totalJules/(satMass*specificHeat) 
    maxT = startTemp + deltaT
-   print("Temp at minute {}: {}".format(i, str(maxT)))
+   #print("Temp at minute {}: {}".format(i, str(maxT)))
    xPoints.append(i)
    yPoints.append(maxT)
 for i in range(darkTime):
-   totalJules += earthIRWPA_max * (solarPanelArea + otherArea) * i
+   totalJules = earthIRWPA_max * (solarPanelArea + otherArea) * i
    totalJules += freeMolecular_o400 * (solarPanelArea + otherArea) * i
    totalJules -= totalHeatRadiated * i
    deltaT = totalJules/satMass*specificHeat
    endT = maxT + deltaT
-   print("Temp at minute {}: {}".format(i + sunlightTime, str(endT)))
-   xPoints.append(i)
+   #print("Temp at minute {}: {}".format(i + sunlightTime, str(endT)))
+   xPoints.append(i+sunlightTime)
    yPoints.append(endT)
    
 
+plt.plot(xPoints, yPoints)
+plt.suptitle('Temperature of Satellite over Time')
+plt.show()
 #watts*time = q
 #Jules/(mass*specificHeat) = delta(T)
