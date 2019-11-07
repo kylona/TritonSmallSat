@@ -1,3 +1,4 @@
+# Initial analysis by Kyle S.
 
 otherP = 15
 solarDensity = 0.02
