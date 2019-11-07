@@ -1,3 +1,4 @@
+# Initial analysis by Kyle S.
 
 otherP = 15
 solarDensity = 0.02
@@ -16,7 +17,10 @@ print('For 7% Scatterometer usage')
 print('Average Power Usage ' + str(temp))
 area = temp / (sunlightPercent / 100) / solarDensity
 print('Minimum Solar Area ' + str(area))
+<<<<<<< HEAD
 
 
 percentage = ((solarPanelArea * solarDensity/100 * sunlightPercent) - otherP - radiP) / (scatP - radiP) * 100
 print('Scatterometer on time Percentage: ' + str(percentage))
+=======
+>>>>>>> b299599d3521292daee9eceae399cb952ff0d071
