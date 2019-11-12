@@ -1,3 +1,4 @@
+import math
 import matplotlib.pyplot as plt
 
 sunWPA_min = 1322
@@ -13,7 +14,7 @@ freeMolecular_o100 = 225
 useConfig = (input("Use Config? (y/n): ") == "y")
 if useConfig:
     satMass = 3000
-    specificHeat = 0.9
+    specificHeat = 0.900
     startTemp = 20
     orbitTime = 100
     sunlightPercent = 60
@@ -22,9 +23,13 @@ if useConfig:
     componantP = 50
     solarPanelArea = 2000 / 10000
     solarPanelAbsorbed = 0.6
-    otherArea = 500 / 10000
+    otherArea = 5000 / 10000
     otherAbsorbed = 0.01
-    totalHeatRadiated = 250
+    emissivitySolarPanels = 0.75 #http://eprints.gla.ac.uk/150163/
+    emissivityOther = 0.77 #Annodized https://www.engineeringtoolbox.com/emissivity-coefficients-d_447.html
+    stef_boltz = 5.6703e-8 #https://www.engineeringtoolbox.com/radiation-heat-transfer-d_431.html
+    spaceTempK = 2.73
+    numPeriods = 20
 else:
     satMass = int(input("Mass of Satellite in grams: "))
     specificHeat = float(input("Average Specific heat of satellite: "))
@@ -38,38 +43,46 @@ else:
     solarPanelAbsorbed = float(input("Solar Panel Light Heat Absorption Coefficient: "))
     otherArea = int(input("Other Surface Area in cm^2: ")) / 10000
     otherAbsorbed = float(input("Other Area Light Heat Absorption Coefficient: "))
-    totalHeatRadiated = float(input("Total heat radiated in W: "))
 
-minT = startTemp
-maxT = startTemp
-endT = startTemp
-xPoints = []
-yPoints = []
-for i in range(sunlightTime):
-   totalJules = (sunWPA_max + albedoWPA_max) * solarPanelArea * solarPanelAbsorbed * i
-   #print(solarPanelArea)
-   totalJules += (sunWPA_max + albedoWPA_max) * otherArea * otherAbsorbed * i
-   totalJules += earthIRWPA_max * (solarPanelArea + otherArea) * i
-   totalJules += freeMolecular_o400 * (solarPanelArea + otherArea) * i
-   totalJules -= totalHeatRadiated * i
-   deltaT = totalJules/(satMass*specificHeat) 
-   maxT = startTemp + deltaT
-   #print("Temp at minute {}: {}".format(i, str(maxT)))
-   xPoints.append(i)
-   yPoints.append(maxT)
-for i in range(darkTime):
-   totalJules = earthIRWPA_max * (solarPanelArea + otherArea) * i
-   totalJules += freeMolecular_o400 * (solarPanelArea + otherArea) * i
-   totalJules -= totalHeatRadiated * i
-   deltaT = totalJules/satMass*specificHeat
-   endT = maxT + deltaT
-   #print("Temp at minute {}: {}".format(i + sunlightTime, str(endT)))
-   xPoints.append(i+sunlightTime)
-   yPoints.append(endT)
-   
+def heatRadiated(temp, emissivity, area):
+  tempK = temp + 273.15
+  q = emissivity * stef_boltz * (math.pow(tempK,4) - spaceTempK) * area
+  return q
+  
+for otherArea in [500/10000,1000/10000,2000/10000,5000/10000,10000/10000,20000/10000]:
+  minT = startTemp
+  maxT = startTemp
+  endT = startTemp
+  xPoints = []
+  yPoints = []
+  totalJules = 0
+  for p in range(numPeriods):
+    for i in range(sunlightTime):
+       deltaJules = (sunWPA_max + albedoWPA_max) * solarPanelArea * solarPanelAbsorbed
+       deltaJules += (sunWPA_max + albedoWPA_max) * otherArea * otherAbsorbed
+       deltaJules += earthIRWPA_max * (solarPanelArea + otherArea)
+       deltaJules += freeMolecular_o400 * (solarPanelArea + otherArea)
+       deltaJules -= heatRadiated(maxT, emissivityOther, otherArea)
+       deltaJules -= heatRadiated(maxT, emissivitySolarPanels, solarPanelArea)
+       deltaT = deltaJules/(satMass*specificHeat) 
+       maxT += deltaT
+       #print("Temp at minute {}: {}".format(i, str(maxT)))
+       xPoints.append(i + p*orbitTime)
+       yPoints.append(maxT)
+    for i in range(darkTime):
+       deltaJules = earthIRWPA_max * (solarPanelArea + otherArea)
+       deltaJules += freeMolecular_o400 * (solarPanelArea + otherArea)
+       deltaJules -= heatRadiated(maxT, emissivityOther, otherArea)
+       deltaJules -= heatRadiated(maxT, emissivitySolarPanels, solarPanelArea)
+       deltaT = deltaJules/satMass*specificHeat
+       maxT += deltaT
+       #print("Temp at minute {}: {}".format(i + sunlightTime, str(endT)))
+       xPoints.append(i + sunlightTime + p*orbitTime)
+       yPoints.append(maxT)
+     
 
-plt.plot(xPoints, yPoints)
-plt.suptitle('Temperature of Satellite over Time')
-plt.show()
+  plt.plot(xPoints, yPoints)
+  plt.suptitle('Temperature of Satellite over Time {} cm^2 of radiating area'.format(otherArea*10000))
+  plt.show()
 #watts*time = q
 #Jules/(mass*specificHeat) = delta(T)
