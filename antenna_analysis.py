@@ -36,8 +36,9 @@ def printSNRComponantRequirements(snr):
   adc_snr = 10**(adc_snr/20)
   print("REMAINING SNR: ", 20*np.log10(1/(1/snr - 1/adc_snr)))
 
-print(20*np.log10(computeRequiredSNR(0.002, 250*(10**6),1/250)))
-printSNRComponantRequirements(computeRequiredSNR(0.002, 250*(10**6),1/250))
+print(20*np.log10(computeRequiredSNR(0.002, 200*(10**6),1/250.0)))
+print(computeRequiredSNR(0.002, 200*(10**6),1/250.0))
+printSNRComponantRequirements(computeRequiredSNR(0.05, 200*(10**6),1/250.0))
   
 
 def stokes(vSig, hSig):
