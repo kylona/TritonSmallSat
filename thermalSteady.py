@@ -4,12 +4,12 @@ import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 
 ## MAJOR SATELLITE PARAMETERS ##
-maxSunlightPercent = 100 # % of time in sunlight
-minSunlightPercent = 60 # % of time in sunlight
 totalSurfaceArea = 7320 / 10000.0 #total surface area of satellite
 totalSolarArea = 6600 / 10000.0 #total area of satellite made of solar panel
 maxLitPanelArea = 2400 / 10000.0 #max area of solar panel in sun in m^2. (thought of as cm^2)
 minLitPanelArea = 800 / 10000.0 #min area of solar panel in the sun
+maxSunlightPercent = 100 # % of time in sunlight
+minSunlightPercent = 60 # % of time in sunlight
 otherArea = totalSurfaceArea - totalSolarArea #Non-solar-panel area
 
 ## MINOR SATELLITE PARAMETERS AND ASUMPTIONS ##
@@ -46,7 +46,7 @@ spaceTempK = 2.73 #From google temperature of space in Kelvin
 ## ACCURACY OF STEADY STATE TEMPERATURE ##
 juleEpsilon = 0.0001 #the minimum difference in heat energy considered significant
 
-## Computes the amount of heat radiated in Jules of an area at a given temperature ##
+## Computes the amount of heat radiated in Watts of an area at a given temperature ##
 def heatRadiated(temp, emissivity, area):
   tempK = temp + 273.15 #convert from C to K
   q = emissivity * stef_boltz * (math.pow(tempK,4) - math.pow(spaceTempK,4)) * area
@@ -62,7 +62,6 @@ def componantHeatMax():
 def componantHeatMin():
   deltaJules = scat_minP * percentScatTime + radiometry_minP * percentOperating_min + componantP
   return deltaJules
-  
   
 for sunlightPercent in range(minSunlightPercent,maxSunlightPercent + 1, 10):
   maxT = startTemp
@@ -91,7 +90,6 @@ for sunlightPercent in range(minSunlightPercent,maxSunlightPercent + 1, 10):
   minT = startTemp
   numSteps = 0;
   heatIn = (sunWPA_min + albedoWPA_min) * minLitPanelArea * solarPanelAbsorbed * sunlightPercent
-  heatIn += (sunWPA_min + albedoWPA_min) * otherArea * otherAbsorbed * sunlightPercent
   heatIn += earthIRWPA_min * (totalSurfaceArea/2)
   #asumption about half of the surface area faces the earth and 100% of radiated IR energy is absorbed
   heatIn += freeMolecular_o400 * (totalSurfaceArea/2)
