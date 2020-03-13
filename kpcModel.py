@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np 
 from mpl_toolkits import mplot3d
 
-requiredKPC = 0.02
+requiredKPC = 0.01582
 numLooks = 4
 time = 1/25
 bandwidth = 25 * (10**3)
